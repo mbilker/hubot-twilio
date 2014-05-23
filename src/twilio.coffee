@@ -1,5 +1,4 @@
-Robot   = require("hubot").robot()
-Adapter = require("hubot").adapter()
+{Robot, Adapter, TextMessage} = require("hubot")
 
 HTTP    = require "http"
 QS      = require "querystring"
@@ -12,17 +11,17 @@ class Twilio extends Adapter
     @robot = robot
     super robot
 
-  send: (user, strings...) ->
+  send: (envelope, strings...) ->
     message = strings.join "\n"
 
-    @send_sms message, user.id, (err, body) ->
+    @send_sms message, envelope.user.id, (err, body) ->
       if err or not body?
         console.log "Error sending reply SMS: #{err}"
       else
         console.log "Sending reply SMS: #{message} to #{user.id}"
 
-  reply: (user, strings...) ->
-    @send user, str for str in strings
+  reply: (envelope, strings...) ->
+    @send envelope, str for str in strings
 
   respond: (regex, callback) ->
     @hear regex, callback
@@ -38,23 +37,24 @@ class Twilio extends Adapter
       response.writeHead 200, 'Content-Type': 'text/plain'
       response.end()
 
+    @emit "connected"
+
   receive_sms: (body, from) ->
     return if body.length is 0
-    user = @userForId from
+    user = @robot.brain.userForId from, name: from, room: 'SMS'
 
-		# TODO Assign self.robot.name here instead of Nurph
-    if body.match(/^Nurph\b/i) is null
-      console.log "I'm adding 'Nurph' as a prefix."
-      body = 'Nurph' + '' + body
+    # TODO Assign self.robot.name here instead of Hubot
+    if body.match(/^Hubot\b/i) is null
+      console.log "I'm adding 'Hubot' as a prefix."
+      body = 'Hubot' + ' ' + body
 
-    @receive new Robot.TextMessage user, body
+    @receive new TextMessage user, body
 
   send_sms: (message, to, callback) ->
     auth = new Buffer(@sid + ':' + @token).toString("base64")
     data = QS.stringify From: @from, To: to, Body: message
 
-    @http("https://api.twilio.com")
-      .path("/2010-04-01/Accounts/#{@sid}/SMS/Messages.json")
+    @robot.http("https://api.twilio.com/2010-04-01/Accounts/#{@sid}/SMS/Messages")
       .header("Authorization", "Basic #{auth}")
       .header("Content-Type", "application/x-www-form-urlencoded")
       .post(data) (err, res, body) ->
