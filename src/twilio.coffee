@@ -44,9 +44,9 @@ class Twilio extends Adapter
     user = @robot.brain.userForId from, name: from, room: 'SMS'
 
     # TODO Assign self.robot.name here instead of Hubot
-    if body.match(/^Hubot\b/i) is null
-      console.log "I'm adding 'Hubot' as a prefix."
-      body = 'Hubot' + ' ' + body
+    if body.match(new RegExp('/^#{robot.name}\b/i')) is null
+      console.log "I'm adding '#{robot.name}' as a prefix."
+      body = robot.name + ' ' + body
 
     @receive new TextMessage user, body
 

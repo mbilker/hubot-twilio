@@ -1,5 +1,5 @@
 {
-  "name":        "hubot-twilio-nc",
+  "name":        "hubot-twilio",
   "version":     "2.1.0",
   "author":      "Neil Cauldwell",
   "keywords":    "github hubot twilio forked adapter",
