@@ -18,7 +18,7 @@ class Twilio extends Adapter
       if err or not body?
         console.log "Error sending reply SMS: #{err}"
       else
-        console.log "Sending reply SMS: #{message} to #{user.id}"
+        console.log "Sending reply SMS: #{message} to #{envelope.user.id}"
 
   reply: (envelope, strings...) ->
     @send envelope, str for str in strings
@@ -44,9 +44,9 @@ class Twilio extends Adapter
     user = @robot.brain.userForId from, name: from, room: 'SMS'
 
     # TODO Assign self.robot.name here instead of Hubot
-    if body.match(new RegExp("^#{robot.name}\\b" , 'i')) is null
-      console.log "I'm adding '#{robot.name}' as a prefix."
-      body = robot.name + ' ' + body
+    if body.match(new RegExp("^#{@robot.name}\\b" , 'i')) is null
+      console.log "I'm adding '#{@robot.name}' as a prefix."
+      body = @robot.name + ' ' + body
 
     @receive new TextMessage user, body
 
